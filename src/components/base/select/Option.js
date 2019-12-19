@@ -1,0 +1,19 @@
+import React from "react";
+
+const Option = props => {
+  function handleClick() {
+    props.onChange({currentTarget:{value:props.value, name:props.name}})
+    props.onOptionSelected();
+  }
+
+  return (
+    <div
+      className={"px-2 py-1 cursor-pointer bg-white hover:bg-blue-100 " + props.className}
+      onClick={handleClick}
+    >
+      {props.children}
+    </div>
+  );
+};
+
+export default Option;
