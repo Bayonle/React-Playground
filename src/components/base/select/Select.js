@@ -4,6 +4,7 @@ import "./select.css";
 const Select = props => {
   const [showOptions, setOptionVisibility] = useState(false);
   const [displayText, setDisplayText] = useState("");
+  let [optionInFocus, setOptionInFocus] = useState(0);
 
   let childrenElements = React.Children.toArray(props.children);
   let optionsObj = [];
@@ -28,9 +29,11 @@ const Select = props => {
     childrenElements = React.cloneElement(childrenElements[0], propsTopass);
   } else if (childrenElements.length > 0) {
     let elements2 = [];
-    childrenElements.forEach(element => {
+    childrenElements.forEach((element, index) => {
+        propsTopass.index = index;
+        propsTopass.activeOptionIndex = optionInFocus;
       if (element.props.value === props.value) {
-        propsTopass.className = "font-bold";
+        propsTopass.className += " font-bold";
       } else {
         propsTopass.className = "";
       }
@@ -42,18 +45,43 @@ const Select = props => {
 
   useEffect(() => {
     setDisplayText(selected !== undefined ? selected.text : "");
+    //get node of currently selected option
+    // if(selected !== undefined){
+    //     let selectedNodeIndex = childrenElements.findIndex(element => element.props.value === selected.value);
+    //     // selectedNode.currentTarget.classList.add('')
+    //     setOptionInFocus(selectedNodeIndex)
+    // }
   }, [selected]);
 
   const handleKeyUp = event => {
-    //   debugger
-      if(event.key === 'Esc' || event.key === 'Escape'){
-          setOptionVisibility(false)
-      }
-  }
+    console.log(event.key)
+    if (event.key === "Esc" || event.key === "Escape") {
+      setOptionVisibility(false);
+    }else if(event.key === 'ArrowUp'){
+        if(optionInFocus > 0){
+            setOptionInFocus(--optionInFocus)
+            console.log('optionInFocus', optionInFocus)
 
-//   const handleInputChange = (event) => {
+        }
+    }else if(event.key === 'ArrowDown'){
 
-//   }
+        if(optionInFocus < childrenElements.length){
+            setOptionInFocus(++optionInFocus)
+            console.log('optionInFocus', optionInFocus)
+
+        }
+    }else if(event.key === 'Enter'){
+        if(showOptions){
+            let infocus = childrenElements[optionInFocus]
+            props.onChange({ currentTarget: { value: infocus.props.value, name: infocus.props.name } });
+            setOptionVisibility(false)
+        }
+    }
+  };
+
+  //   const handleInputChange = (event) => {
+
+  //   }
 
   return (
     <div className="relative">
@@ -72,6 +100,16 @@ const Select = props => {
         onKeyUp={handleKeyUp}
         // onChange={handleInputChange}
       />
+
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+        <svg
+          className="fill-current h-4 w-4"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+        >
+          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+        </svg>
+      </div>
 
       <div
         className={`options-panel options bg-blue-300 absolute w-full left-0 ${
